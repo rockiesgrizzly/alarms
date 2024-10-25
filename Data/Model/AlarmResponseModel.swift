@@ -33,4 +33,10 @@ struct AlarmResponseModel: Decodable {
             case oneTime = "one-time"
         }
     }
+    
+    init(timestamp: String, sound: String, recurring: String) {
+        self.timestamp = timestamp
+        self.sound = sound
+        self.recurring = recurring
+    }
 }

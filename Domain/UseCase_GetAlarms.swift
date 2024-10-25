@@ -6,9 +6,11 @@ protocol UseCase_GetAlarmsProtocol {
 
 /// Retrieves `alarmDetailViewModels` from a repository
 struct UseCase_GetAlarms: UseCase_GetAlarmsProtocol {
+    static var repositoryType: any AlarmsDataRepositoryProtocol.Type = AlarmsDataRepository.self
+    
     static var alarmDetailViewModels: [AlarmDetailViewModel] {
         get async throws {
-            try await AlarmsDataRepository
+            try await repositoryType
                 .alarmsResponses
                 .alarmDetailViewModels
         }

@@ -10,8 +10,6 @@ _The main AlarmViewModel kicks off a retrieval use case. The retrieval use case 
 
 _The app provides both an screen notification with sound when an alarm occurs, and, if the user desires, a system notification._
 
-_I dropped in a few unit tests and UI tests to give testing examples. More can be added if desired._
-
 <img width="1116" alt="Screenshot 2024-10-25 at 11 35 08 AM" src="https://github.com/user-attachments/assets/4bfd5333-0e90-4165-a053-bda6a9e0009a">
 
 
