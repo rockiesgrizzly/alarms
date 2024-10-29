@@ -60,9 +60,9 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		43C580882CCBED5B00B7758A /* AlarmsUITests */ = {
+		43C580882CCBED5B00B7758A /* UITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AlarmsUITests;
+			path = UITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -101,7 +101,7 @@
 				43C57FD52CCBE5C300B7758A /* Data */,
 				43C57FDF2CCBE8B600B7758A /* Resources */,
 				43C57F782CCBE4D300B7758A /* Tests */,
-				43C580882CCBED5B00B7758A /* AlarmsUITests */,
+				43C580882CCBED5B00B7758A /* UITests */,
 				43C57F632CCBE4D100B7758A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -182,7 +182,7 @@
 				43C5808E2CCBED5B00B7758A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				43C580882CCBED5B00B7758A /* AlarmsUITests */,
+				43C580882CCBED5B00B7758A /* UITests */,
 			);
 			name = AlarmsUITests;
 			packageProductDependencies = (
