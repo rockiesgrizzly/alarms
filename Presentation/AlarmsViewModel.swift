@@ -25,7 +25,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
     
     /// Here we use `DispatchSourceTimer` given it's GCD queue based, allows
     /// precise control over when the timer should fire, and offers simple cancellation.
-    var alarmAlertTimers = [Date: DispatchSourceTimer]()
+    private var alarmAlertTimers = [Date: DispatchSourceTimer]()
     
     // MARK: - Internal
     
@@ -49,13 +49,17 @@ class AlarmsViewModel: NSObject, ObservableObject {
         
         for model in alarmDetailViewModels {            
             // On screen alert
-            alarmAlertTimers[model.alarmModel.date] = alarmTimer(for: model.alarmModel)
+            addAlarmTimer(for: model.alarmModel)
             
             // Notification if enabled
             Task {
                 await UseCase_ScheduleAlarmNotification.schedule(model.alarmModel)
             }
         }
+    }
+    
+    func addAlarmTimer(for alarmModel: AlarmModel) {
+        alarmAlertTimers[alarmModel.date] = alarmTimer(for: alarmModel)
     }
     
     func alarmTimer(for alarmModel: AlarmModel) -> DispatchSourceTimer? {
@@ -91,7 +95,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
         alarmDetailViewModels = refreshedModels.sorted()
         
         // On screen alert
-        alarmAlertTimers[newViewModel.alarmModel.date] = alarmTimer(for: newViewModel.alarmModel)
+        addAlarmTimer(for: newViewModel.alarmModel)
         
         // Notification if enabled
         Task {
