@@ -21,3 +21,9 @@ struct AlarmDetailView: View {
         .accessibilityIdentifier("alarm detail view \(viewModel.alarmModel.date)")
     }
 }
+
+#Preview {
+    let detail = AlarmDetailViewModel(date: Date(timeIntervalSinceNow: 40000000), saved: true, sound: .brownNoise, recurrence: .oneTime)
+    AlarmDetailView(viewModel: detail)
+    Spacer()
+}

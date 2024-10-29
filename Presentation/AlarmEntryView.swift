@@ -41,3 +41,8 @@ struct AlarmEntryView: View {
         .padding()
     }
 }
+
+#Preview {
+    AlarmEntryView(isPresented: .constant(true), userCompletedEntry:.constant(false), userEnteredAlarmDate: .constant(Date()), userChosenSound: .constant(.ocean), userChosenRecurrence: .constant(.weekly))
+    Spacer()
+}

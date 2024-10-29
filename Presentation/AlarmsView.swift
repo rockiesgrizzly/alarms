@@ -2,14 +2,13 @@ import SwiftUI
 
 /// First view to which `AlarmsApp` hands off. Presents a list of alarm detail views and an alarm entry popover.
 struct AlarmsView: View {
-    @StateObject var viewModel: AlarmsViewModel
+    @ObservedObject var viewModel: AlarmsViewModel
     
     var body: some View {
         Spacer()
-        List {
-            ForEach(viewModel.alarmDetailViewModels) {
+        
+        List(viewModel.alarmDetailViewModels, id: \.id) {
                 AlarmDetailView(viewModel: $0)
-            } 
         }
         
         Button(action: {
@@ -30,6 +29,9 @@ struct AlarmsView: View {
 }
 
 #Preview {
-    AlarmsView(viewModel: AlarmsViewModel())
+    let detail = AlarmDetailViewModel(date: Date(timeIntervalSinceNow: 40000000), saved: true, sound: .brownNoise, recurrence: .oneTime)
+    let detail2 = AlarmDetailViewModel(date: Date(), saved: false, sound: .party, recurrence: .weekly)
+    var previewModel = AlarmsViewModel(alarmDetailViewModels: [detail, detail2])
+    AlarmsView(viewModel: previewModel)
 }
 

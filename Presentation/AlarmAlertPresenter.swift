@@ -15,8 +15,7 @@ struct AlarmAlertPresenter {
         alert.addAction(alertAction)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first,
-           let rootVC = window.rootViewController {
+           let rootVC = windowScene.windows.first?.rootViewController {
             rootVC.present(alert, animated: true)
         }
         

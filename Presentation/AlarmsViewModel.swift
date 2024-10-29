@@ -23,9 +23,22 @@ class AlarmsViewModel: NSObject, ObservableObject {
     @Published var userChosenAlarmSound: AlarmSound = .ocean
     @Published var userChosenRecurrence: AlarmRecurrence = .oneTime
     
-    private var alarmAlertTimers = [Date: DispatchSourceTimer]()
+    /// Here we use `DispatchSourceTimer` given it's GCD queue based, allows
+    /// precise control over when the timer should fire, and offers simple cancellation.
+    var alarmAlertTimers = [Date: DispatchSourceTimer]()
     
     // MARK: - Internal
+    
+    init(alarmDetailViewModels: [AlarmDetailViewModel] = [AlarmDetailViewModel](), showAlarmTriggeredView: Bool = false, showAlarmEntryView: Bool = false, userCompletedEntryView: Bool = false, userEnteredAlarmDate: Date = Date(), userChosenAlarmSound: AlarmSound = .brownNoise, userChosenRecurrence: AlarmRecurrence = .oneTime, alarmAlertTimers: [Date : DispatchSourceTimer] = [Date: DispatchSourceTimer]()) {
+        self.alarmDetailViewModels = alarmDetailViewModels
+        self.showAlarmTriggeredView = showAlarmTriggeredView
+        self.showAlarmEntryView = showAlarmEntryView
+        self.userCompletedEntryView = userCompletedEntryView
+        self.userEnteredAlarmDate = userEnteredAlarmDate
+        self.userChosenAlarmSound = userChosenAlarmSound
+        self.userChosenRecurrence = userChosenRecurrence
+        self.alarmAlertTimers = alarmAlertTimers
+    }
 
     @MainActor
     func refreshAlarmDetailModels() async {
@@ -36,7 +49,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
         
         for model in alarmDetailViewModels {            
             // On screen alert
-            addAlarmTimer(for: model.alarmModel)
+            alarmAlertTimers[model.alarmModel.date] = alarmTimer(for: model.alarmModel)
             
             // Notification if enabled
             Task {
@@ -45,8 +58,8 @@ class AlarmsViewModel: NSObject, ObservableObject {
         }
     }
     
-    func addAlarmTimer(for alarmModel: AlarmModel) {
-        guard alarmModel.date > Date() else { return }
+    func alarmTimer(for alarmModel: AlarmModel) -> DispatchSourceTimer? {
+        guard alarmModel.date > Date() else { return nil }
         
         let timer = DispatchSource.makeTimerSource(flags: [], queue: .main)
         let interval = alarmModel.date.timeIntervalSinceNow
@@ -58,7 +71,13 @@ class AlarmsViewModel: NSObject, ObservableObject {
             }
         }
         timer.resume()
-        alarmAlertTimers[alarmModel.date] = timer
+        return timer
+    }
+    
+    func removeAlarmTimer(for date: Date) {
+        guard let matchingTimer = alarmAlertTimers[date] else { return }
+        matchingTimer.cancel()
+        alarmAlertTimers.removeValue(forKey: date)
     }
     
     func userAdded(alarm: AlarmModel) {
@@ -72,7 +91,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
         alarmDetailViewModels = refreshedModels.sorted()
         
         // On screen alert
-        addAlarmTimer(for: newViewModel.alarmModel)
+        alarmAlertTimers[newViewModel.alarmModel.date] = alarmTimer(for: newViewModel.alarmModel)
         
         // Notification if enabled
         Task {
