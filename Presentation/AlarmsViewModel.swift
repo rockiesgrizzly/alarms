@@ -80,6 +80,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
             
             Task {
                 await UseCase_CancelAlarmNotification.cancel(foundAlarm.alarmModel)
+                // would remove from notification handler here also if using this function
             }
         }
     }
