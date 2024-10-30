@@ -40,12 +40,13 @@ class AlarmsViewModel: NSObject, ObservableObject {
         self.alarmAlertTimers = alarmAlertTimers
     }
 
+    // There's some business logic here that would be moved into use cases to stick to Clean Swift architecture. Traded off functionality dropping logic here to get it working given the take home time constraints.
     @MainActor
     func refreshAlarmDetailModels() async {
         guard let models = try? await UseCase_GetAlarms.alarmDetailViewModels else { return }
         alarmDetailViewModels = models.sorted()
         
-        // Ideally, only update new dates here
+        // Ideally, only update new dates would be added here if we had local data storage
         
         for model in alarmDetailViewModels {            
             // On screen alert
@@ -59,23 +60,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
     }
     
     func addAlarmTimer(for alarmModel: AlarmModel) {
-        alarmAlertTimers[alarmModel.date] = alarmTimer(for: alarmModel)
-    }
-    
-    func alarmTimer(for alarmModel: AlarmModel) -> DispatchSourceTimer? {
-        guard alarmModel.date > Date() else { return nil }
-        
-        let timer = DispatchSource.makeTimerSource(flags: [], queue: .main)
-        let interval = alarmModel.date.timeIntervalSinceNow
-        timer.schedule(deadline: .now() + interval)
-        
-        timer.setEventHandler {
-            Task { @MainActor in
-                AlarmAlertPresenter.trigger(with: alarmModel)
-            }
-        }
-        timer.resume()
-        return timer
+        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel)
     }
     
     func removeAlarmTimer(for date: Date) {
@@ -97,7 +82,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
         // On screen alert
         addAlarmTimer(for: newViewModel.alarmModel)
         
-        // Notification if enabled
+        // System notification if enabled
         Task {
             await UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
         }
