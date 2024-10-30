@@ -14,8 +14,22 @@ actor AlarmsNotificationHandler {
     static let shared = AlarmsNotificationHandler()
     static let logger = Logger(subsystem: "Alarms", category: "NotificationHandler")
     
+    /// Here we use `DispatchSourceTimer` given it's GCD queue based, allows
+    /// precise control over when the timer should fire, and offers simple cancellation.
+    private var alarmAlertTimers = [Date: DispatchSourceTimer]()
+    
     /// Can only be used through `shared` for safety
     private init() {}
+    
+    func addAlarmTimer(for alarmModel: AlarmModel) {
+        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel)
+    }
+    
+    func removeAlarmTimer(for date: Date) {
+        guard let matchingTimer = alarmAlertTimers[date] else { return }
+        matchingTimer.cancel()
+        alarmAlertTimers.removeValue(forKey: date)
+    }
     
     func schedule(_ alarm: NotificationAlarm) {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
@@ -24,21 +38,7 @@ actor AlarmsNotificationHandler {
             
             let content = UNMutableNotificationContent()
             content.title = alarm.title
-            
-            var dateComponents = Calendar.autoupdatingCurrent.dateComponents([.hour, .minute], from: alarm.date)
-            
-            switch alarm.recurrence {
-            case .yearly:
-                dateComponents = Calendar.autoupdatingCurrent.dateComponents([.month, .day, .hour, .minute], from: alarm.date) // Include .month
-            case .monthly:
-                dateComponents = Calendar.autoupdatingCurrent.dateComponents([.day, .hour, .minute], from: alarm.date) // Include .day
-            case .weekly:
-                dateComponents = Calendar.autoupdatingCurrent.dateComponents([.weekday, .hour, .minute], from: alarm.date)
-            case .oneTime:
-                dateComponents = Calendar.autoupdatingCurrent.dateComponents([.year, .month, .day, .hour, .minute], from: alarm.date)
-            }
-            
-            dateComponents.timeZone = .current
+            guard let dateComponents = UseCase_DateComponentsForRecurrence.dateComponents(for: alarm.date, and: alarm.recurrence) else { return }
 
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: alarm.recurrence != .oneTime)
             let request = UNNotificationRequest(identifier: alarm.identifier, content: content, trigger: trigger)

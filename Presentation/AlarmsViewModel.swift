@@ -23,13 +23,10 @@ class AlarmsViewModel: NSObject, ObservableObject {
     @Published var userChosenAlarmSound: AlarmSound = .ocean
     @Published var userChosenRecurrence: AlarmRecurrence = .oneTime
     
-    /// Here we use `DispatchSourceTimer` given it's GCD queue based, allows
-    /// precise control over when the timer should fire, and offers simple cancellation.
-    private var alarmAlertTimers = [Date: DispatchSourceTimer]()
-    
     // MARK: - Internal
     
-    init(alarmDetailViewModels: [AlarmDetailViewModel] = [AlarmDetailViewModel](), showAlarmTriggeredView: Bool = false, showAlarmEntryView: Bool = false, userCompletedEntryView: Bool = false, userEnteredAlarmDate: Date = Date(), userChosenAlarmSound: AlarmSound = .brownNoise, userChosenRecurrence: AlarmRecurrence = .oneTime, alarmAlertTimers: [Date : DispatchSourceTimer] = [Date: DispatchSourceTimer]()) {
+    // Here we have an initializer with default parameter values for easy SwiftUI #Preview usage
+    init(alarmDetailViewModels: [AlarmDetailViewModel] = [AlarmDetailViewModel](), showAlarmTriggeredView: Bool = false, showAlarmEntryView: Bool = false, userCompletedEntryView: Bool = false, userEnteredAlarmDate: Date = Date(), userChosenAlarmSound: AlarmSound = .brownNoise, userChosenRecurrence: AlarmRecurrence = .oneTime) {
         self.alarmDetailViewModels = alarmDetailViewModels
         self.showAlarmTriggeredView = showAlarmTriggeredView
         self.showAlarmEntryView = showAlarmEntryView
@@ -37,10 +34,8 @@ class AlarmsViewModel: NSObject, ObservableObject {
         self.userEnteredAlarmDate = userEnteredAlarmDate
         self.userChosenAlarmSound = userChosenAlarmSound
         self.userChosenRecurrence = userChosenRecurrence
-        self.alarmAlertTimers = alarmAlertTimers
     }
 
-    // There's some business logic here that would be moved into use cases to stick to Clean Swift architecture. Traded off functionality dropping logic here to get it working given the take home time constraints.
     @MainActor
     func refreshAlarmDetailModels() async {
         guard let models = try? await UseCase_GetAlarms.alarmDetailViewModels else { return }
@@ -48,25 +43,16 @@ class AlarmsViewModel: NSObject, ObservableObject {
         
         // Ideally, only update new dates would be added here if we had local data storage
         
-        for model in alarmDetailViewModels {            
-            // On screen alert
-            addAlarmTimer(for: model.alarmModel)
-            
+        for model in alarmDetailViewModels {
             // Notification if enabled
             Task {
+                // On screen alert
+                await AlarmsNotificationHandler.shared.addAlarmTimer(for: model.alarmModel)
+                
+                // System notification if enabled
                 await UseCase_ScheduleAlarmNotification.schedule(model.alarmModel)
             }
         }
-    }
-    
-    func addAlarmTimer(for alarmModel: AlarmModel) {
-        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel)
-    }
-    
-    func removeAlarmTimer(for date: Date) {
-        guard let matchingTimer = alarmAlertTimers[date] else { return }
-        matchingTimer.cancel()
-        alarmAlertTimers.removeValue(forKey: date)
     }
     
     func userAdded(alarm: AlarmModel) {
@@ -79,11 +65,11 @@ class AlarmsViewModel: NSObject, ObservableObject {
         refreshedModels.append(newViewModel)
         alarmDetailViewModels = refreshedModels.sorted()
         
-        // On screen alert
-        addAlarmTimer(for: newViewModel.alarmModel)
-        
-        // System notification if enabled
         Task {
+            // On screen alert
+            await AlarmsNotificationHandler.shared.addAlarmTimer(for: newViewModel.alarmModel)
+            
+            // System notification if enabled
             await UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
         }
     }

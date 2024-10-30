@@ -17,6 +17,12 @@ final class UseCaseTests {
         let timer = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: addedAlarmModel)
         #expect(timer != nil)
     }
+    
+    @Test("Test Alarms View Model can add a timer from an Alarm Model")
+    func dateAndRecurrenceProducesComponents() async throws {
+        let dateComponents = UseCase_DateComponentsForRecurrence.dateComponents(for: AlarmModel.mockFutureDate, and: .weekly)
+        #expect(dateComponents != nil)
+    }
 }
 
 private extension AlarmModel {
