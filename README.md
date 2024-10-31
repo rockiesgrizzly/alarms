@@ -17,7 +17,9 @@ _The app provides both an screen notification with sound when an alarm occurs, a
 
 _Note: Sound wasn't captured in this video. It works in the app itself._
 
-https://github.com/user-attachments/assets/aac10606-580a-40ff-8373-807a5524890b
+https://github.com/user-attachments/assets/646f9ca1-c3c1-4376-8f36-cef3bad838a5
+
+
 
 
 
