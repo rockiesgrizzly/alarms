@@ -11,8 +11,8 @@ class AlarmsViewModel: NSObject, ObservableObject {
     @Published var userCompletedEntryView = false {
         didSet {
             guard userCompletedEntryView else { return }
-            let newViewModel = AlarmDetailViewModel(date: userEnteredAlarmDate, 
-                                                    saved: false, 
+            let newViewModel = AlarmDetailViewModel(date: userEnteredAlarmDate,
+                                                    saved: false,
                                                     sound: userChosenAlarmSound, recurrence: userChosenRecurrence)
             userAdded(alarm: newViewModel.alarmModel)
             userCompletedEntryView = false
@@ -24,7 +24,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
     @Published var userChosenRecurrence: AlarmRecurrence = .oneTime
     
     // MARK: - Internal
-
+    
     @MainActor
     func refreshAlarmDetailModels() async {
         guard let models = try? await UseCase_GetAlarms.alarmDetailViewModels else { return }
@@ -46,9 +46,9 @@ class AlarmsViewModel: NSObject, ObservableObject {
     
     func userAdded(alarm: AlarmModel) {
         guard !alarmDetailViewModels.contains(where: {$0.alarmModel.date == alarm.date}) else { return }
-        let newViewModel = AlarmDetailViewModel(date: alarm.date, 
-                                                saved: alarm.saved, 
-                                                sound: alarm.sound, 
+        let newViewModel = AlarmDetailViewModel(date: alarm.date,
+                                                saved: alarm.saved,
+                                                sound: alarm.sound,
                                                 recurrence: alarm.recurrence)
         var refreshedModels = alarmDetailViewModels
         refreshedModels.append(newViewModel)
@@ -56,11 +56,22 @@ class AlarmsViewModel: NSObject, ObservableObject {
         
         Task {
             // On screen alert
-            await AlarmsDispatchTimerHandler.shared.addAlarmTimer(for: newViewModel.alarmModel)
+            await AlarmsDispatchTimerHandler.shared.addAlarmTimer(for: newViewModel.alarmModel) {
+                Task { [weak self] in
+                    guard let self else { return }
+                    await dismissAlarm(on: newViewModel.alarmModel.date)
+                }
+            }
             
             // System notification if enabled
             await UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
         }
+    }
+    
+    @MainActor
+    func dismissAlarm(on date: Date) {
+        guard let matchingAlarm = alarmDetailViewModels.enumerated().first(where: { $0.element.alarmModel.date == date }) else { return }
+        alarmDetailViewModels.remove(at: matchingAlarm.offset)
     }
     
     func userCanceled(alarm: AlarmDetailViewModel) {

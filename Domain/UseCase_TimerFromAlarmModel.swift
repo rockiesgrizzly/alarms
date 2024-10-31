@@ -1,12 +1,12 @@
 import Foundation
 
 protocol UseCase_TimerFromAlarmModelProtocol {
-    static func dispatchSourceTimer(for alarmModel: AlarmModel) -> DispatchSourceTimer?
+    static func dispatchSourceTimer(for alarmModel: AlarmModel, completion: (() -> Void)?) -> DispatchSourceTimer?
 }
 
 /// Cancels system notification connected to an alarm if user enabled notifications
 struct UseCase_TimerFromAlarmModel: UseCase_TimerFromAlarmModelProtocol {
-    static func dispatchSourceTimer(for alarmModel: AlarmModel) -> DispatchSourceTimer? {
+    static func dispatchSourceTimer(for alarmModel: AlarmModel, completion: (() -> Void)? = nil) -> DispatchSourceTimer? {
         // Extract all components but seconds since the user didn't set these
         let componentsSansSeconds = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute],
                                                          from: alarmModel.date)
@@ -25,6 +25,7 @@ struct UseCase_TimerFromAlarmModel: UseCase_TimerFromAlarmModelProtocol {
         timer.setEventHandler {
             Task { @MainActor in
                 AlarmAlertPresenter.trigger(with: alarmModel)
+                completion?()
             }
         }
 

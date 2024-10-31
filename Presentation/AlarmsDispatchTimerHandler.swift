@@ -19,8 +19,8 @@ actor AlarmsDispatchTimerHandler {
     /// Can only be used through `shared` for safety
     private init() {}
     
-    func addAlarmTimer(for alarmModel: AlarmModel) {
-        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel)
+    func addAlarmTimer(for alarmModel: AlarmModel, completion: (() -> Void)? = nil) {
+        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel, completion: completion)
     }
     
     func removeAlarmTimer(for date: Date) {
