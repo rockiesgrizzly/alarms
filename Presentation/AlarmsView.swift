@@ -33,7 +33,7 @@ struct AlarmsView: View {
 #Preview {
     let detail = AlarmDetailViewModel(date: Date(timeIntervalSinceNow: 40000000), saved: true, sound: .brownNoise, recurrence: .oneTime)
     let detail2 = AlarmDetailViewModel(date: Date(), saved: false, sound: .party, recurrence: .weekly)
-    var previewModel = AlarmsViewModel(alarmDetailViewModels: [detail, detail2])
+    let previewModel = AlarmsViewModel(alarmDetailViewModels: [detail, detail2])
     AlarmsView(viewModel: previewModel)
 }
 

@@ -36,7 +36,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
             // Notification if enabled
             Task {
                 // On screen alert
-                await AlarmsNotificationHandler.shared.addAlarmTimer(for: model.alarmModel)
+                await AlarmsDispatchTimerHandler.shared.addAlarmTimer(for: model.alarmModel)
                 
                 // System notification if enabled
                 await UseCase_ScheduleAlarmNotification.schedule(model.alarmModel)
@@ -56,7 +56,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
         
         Task {
             // On screen alert
-            await AlarmsNotificationHandler.shared.addAlarmTimer(for: newViewModel.alarmModel)
+            await AlarmsDispatchTimerHandler.shared.addAlarmTimer(for: newViewModel.alarmModel)
             
             // System notification if enabled
             await UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
@@ -69,7 +69,6 @@ class AlarmsViewModel: NSObject, ObservableObject {
             
             Task {
                 await UseCase_CancelAlarmNotification.cancel(foundAlarm.alarmModel)
-                // would remove from notification handler here also if using this function
             }
         }
     }

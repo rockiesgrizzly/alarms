@@ -14,22 +14,8 @@ actor AlarmsNotificationHandler {
     static let shared = AlarmsNotificationHandler()
     static let logger = Logger(subsystem: "Alarms", category: "NotificationHandler")
     
-    /// Here we use `DispatchSourceTimer` given it's GCD queue based, allows
-    /// precise control over when the timer should fire, and offers simple cancellation.
-    private var alarmAlertTimers = [Date: DispatchSourceTimer]()
-    
     /// Can only be used through `shared` for safety
     private init() {}
-    
-    func addAlarmTimer(for alarmModel: AlarmModel) {
-        alarmAlertTimers[alarmModel.date] = UseCase_TimerFromAlarmModel.dispatchSourceTimer(for: alarmModel)
-    }
-    
-    func removeAlarmTimer(for date: Date) {
-        guard let matchingTimer = alarmAlertTimers[date] else { return }
-        matchingTimer.cancel()
-        alarmAlertTimers.removeValue(forKey: date)
-    }
     
     func schedule(_ alarm: NotificationAlarm) {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
