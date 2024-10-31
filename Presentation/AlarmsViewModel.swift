@@ -24,17 +24,6 @@ class AlarmsViewModel: NSObject, ObservableObject {
     @Published var userChosenRecurrence: AlarmRecurrence = .oneTime
     
     // MARK: - Internal
-    
-    // Here we have an initializer with default parameter values for easy SwiftUI #Preview usage
-    init(alarmDetailViewModels: [AlarmDetailViewModel] = [AlarmDetailViewModel](), showAlarmTriggeredView: Bool = false, showAlarmEntryView: Bool = false, userCompletedEntryView: Bool = false, userEnteredAlarmDate: Date = Date(), userChosenAlarmSound: AlarmSound = .brownNoise, userChosenRecurrence: AlarmRecurrence = .oneTime) {
-        self.alarmDetailViewModels = alarmDetailViewModels
-        self.showAlarmTriggeredView = showAlarmTriggeredView
-        self.showAlarmEntryView = showAlarmEntryView
-        self.userCompletedEntryView = userCompletedEntryView
-        self.userEnteredAlarmDate = userEnteredAlarmDate
-        self.userChosenAlarmSound = userChosenAlarmSound
-        self.userChosenRecurrence = userChosenRecurrence
-    }
 
     @MainActor
     func refreshAlarmDetailModels() async {
