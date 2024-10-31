@@ -12,9 +12,11 @@ struct AlarmEntryView: View {
         VStack {
             Text("Add Alarm")
                 .font(.headline)
-            DatePicker("", selection: $userEnteredAlarmDate, 
-                       displayedComponents: [.date, .hourAndMinute])
-                .datePickerStyle(.wheel)
+            DatePicker("",
+                       selection: $userEnteredAlarmDate,
+                       in: Date()..., // force choice after current time
+                       displayedComponents:  [.date, .hourAndMinute])
+            .datePickerStyle(.wheel)
             Picker("", selection: $userChosenSound) {
                 ForEach(AlarmSound.allCases, id: \.self) {
                     Text("\($0.displayString)")
