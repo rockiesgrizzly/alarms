@@ -80,6 +80,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
             
             Task {
                 await UseCase_CancelAlarmNotification.cancel(foundAlarm.alarmModel)
+                await dismissAlarm(on: foundAlarm.alarmModel.date)
             }
         }
     }

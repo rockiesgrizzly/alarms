@@ -8,7 +8,7 @@ protocol UseCase_ScheduleAlarmNotificationProtocol {
 struct UseCase_ScheduleAlarmNotification: UseCase_ScheduleAlarmNotificationProtocol {
     static func schedule(_ alarm: AlarmModel) async {
         guard let notificationAlarm = alarm.notificationAlarm else { return }
-        await AlarmsNotificationHandler.shared.schedule(notificationAlarm)
+        AlarmsNotificationHandler.schedule(notificationAlarm)
     }
 }
 

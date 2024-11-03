@@ -8,7 +8,7 @@ protocol UseCase_CancelAlarmNotificationProtocol {
 struct UseCase_CancelAlarmNotification: UseCase_CancelAlarmNotificationProtocol {
     static func cancel(_ alarm: AlarmModel) async {
         guard let notificationAlarm = alarm.notificationAlarm else { return }
-        await AlarmsNotificationHandler.shared.cancel(notificationAlarm)
+        AlarmsNotificationHandler.cancel(notificationAlarm)
     }
 }
 

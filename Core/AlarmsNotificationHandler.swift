@@ -10,14 +10,11 @@ struct NotificationAlarm {
 }
 
 /// Interacts with `UNUserNotificationCenter` to present notifications to the user if granted permission
-actor AlarmsNotificationHandler {
-    static let shared = AlarmsNotificationHandler()
+struct AlarmsNotificationHandler {
     static let logger = Logger(subsystem: "Alarms", category: "NotificationHandler")
+
     
-    /// Can only be used through `shared` for safety
-    private init() {}
-    
-    func schedule(_ alarm: NotificationAlarm) {
+   static func schedule(_ alarm: NotificationAlarm) {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             let existingRequest = requests.first(where: { $0.identifier == alarm.identifier })
             guard existingRequest == nil else { return }
@@ -37,14 +34,14 @@ actor AlarmsNotificationHandler {
         }
     }
     
-    func cancel(_ alarm: NotificationAlarm) {
+    static func cancel(_ alarm: NotificationAlarm) {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             guard let existingRequest = requests.first(where: { $0.identifier == alarm.identifier }) else { return }
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [existingRequest.identifier])
         }
     }
     
-    func requestNotificationAuthorization() {
+    static func requestNotificationAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             if granted {
                 AlarmsNotificationHandler.logger.debug("Notification permission granted.")
