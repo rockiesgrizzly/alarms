@@ -33,13 +33,12 @@ class AlarmsViewModel: NSObject, ObservableObject {
         // Ideally, only update new dates would be added here if we had local data storage
         
         for model in alarmDetailViewModels {
-            // Notification if enabled
+            // System notification if enabled
+            UseCase_ScheduleAlarmNotification.schedule(model.alarmModel)
+            
             Task {
                 // On screen alert
                 await AlarmsDispatchTimerHandler.shared.addAlarmTimer(for: model.alarmModel)
-                
-                // System notification if enabled
-                await UseCase_ScheduleAlarmNotification.schedule(model.alarmModel)
             }
         }
     }
@@ -64,7 +63,7 @@ class AlarmsViewModel: NSObject, ObservableObject {
             }
             
             // System notification if enabled
-            await UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
+            UseCase_ScheduleAlarmNotification.schedule(newViewModel.alarmModel)
         }
     }
     
@@ -78,15 +77,16 @@ class AlarmsViewModel: NSObject, ObservableObject {
         if let (index, foundAlarm) = alarmDetailViewModels.enumerated().first(where: { $0.element.alarmModel.date == alarm.alarmModel.date}) {
             alarmDetailViewModels.remove(at: index)
             
+            UseCase_CancelAlarmNotification.cancel(foundAlarm.alarmModel)
+            
             Task {
-                await UseCase_CancelAlarmNotification.cancel(foundAlarm.alarmModel)
                 await dismissAlarm(on: foundAlarm.alarmModel.date)
             }
         }
     }
     
     func requestUserNotificationPermission() async {
-        await UseCase_RequestNotificationsPermission.request()
+        UseCase_RequestNotificationsPermission.request()
     }
 }
 
